@@ -5,14 +5,97 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Weather"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ComboBox x:Name="Days" SelectionChanged="SelectDay" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Margin="10"/>
+        Title="Weather Forecast" Height="500" Width="800">
 
-        <ScrollViewer Margin="10,37,10,10">
-            <StackPanel x:Name="parent">
-                
-            </StackPanel>
-        </ScrollViewer>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" 
+                Background="#1A1A1A" 
+            Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="WeatherSwag"
+                           Foreground="White"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <ComboBox x:Name="Days" 
+                              SelectionChanged="SelectDay"
+                              Width="150"
+                              Height="30"
+                              Margin="0,0,10,0"/>
+
+                    <Button  Content="Обновить"
+                            Style="{StaticResource PrimaryButtonStyle}" 
+                        Width="100"
+                            Height="40"
+                            Click="Update"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" 
+                    Background="#F8F8F8" 
+                Padding="10"
+                    BorderBrush="#F0F0F0"
+
+                BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Время" 
+                               FontWeight="Bold"
+                               Foreground="#1A1A1A" 
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Условия" 
+                               Grid.Column="1"
+                               FontWeight="Bold"
+                               Foreground="#1A1A1A"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Влажность" 
+                               Grid.Column="2"
+                               FontWeight="Bold"
+                               Foreground="#1A1A1A"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Осадки" 
+                               Grid.Column="3"
+                               FontWeight="Bold"
+                               Foreground="#1A1A1A"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Температура" 
+                               Grid.Column="4"
+                               FontWeight="Bold"
+                               Foreground="#1A1A1A"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- Scrollable content -->
+            <ScrollViewer Grid.Row="1" 
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="parent"/>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Window>
