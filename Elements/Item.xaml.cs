@@ -59,7 +59,7 @@ namespace Weather.Elements
             else if (lowerCondition.Contains("снег") || lowerCondition.Contains("snow"))
                 iconCondition.Text = "❄";
             else if (lowerCondition.Contains("град") || lowerCondition.Contains("hail"))
-                iconCondition.Text = "°"; // Символ градуса для града
+                iconCondition.Text = "°";
             else if (lowerCondition.Contains("туман") || lowerCondition.Contains("fog") ||
                      lowerCondition.Contains("mist"))
                 iconCondition.Text = "🌫";
@@ -82,14 +82,14 @@ namespace Weather.Elements
             else if (lowerType.Contains("снег") || lowerType.Contains("snow"))
                 iconPrecipitation.Text = "❄";
             else if (lowerType.Contains("град") || lowerType.Contains("hail"))
-                iconPrecipitation.Text = "°"; // Символ градуса для града
+                iconPrecipitation.Text = "°"; 
             else if (lowerType.Contains("дождь со снегом") || lowerType.Contains("wet-snow"))
                 iconPrecipitation.Text = "❄🌧";
             else if (lowerType.Contains("без осадков") || lowerType.Contains("нет") ||
                      lowerType == "0" || lowerType.Contains("no"))
                 iconPrecipitation.Text = "";
             else
-                iconPrecipitation.Text = "💦"; // Простая капля
+                iconPrecipitation.Text = "💦"; 
         }
 
         public void SetTemperatureColor(int temperature)

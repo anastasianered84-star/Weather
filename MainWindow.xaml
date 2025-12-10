@@ -30,6 +30,13 @@
                 <StackPanel Grid.Column="1" 
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
+                    <TextBox Text="Пермь" x:Name="CityTextBox" 
+             Width="200" 
+             Height="30" 
+             Margin="0,0,10,0" 
+             VerticalAlignment="Center"
+             
+             ToolTip="Введите название города или адрес"/>
                     <ComboBox x:Name="Days" 
                               SelectionChanged="SelectDay"
                               Width="150"

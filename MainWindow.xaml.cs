@@ -1,59 +1,80 @@
-﻿using System.Text;
+﻿// Файл: MainWindow.xaml.cs (обновленная версия)
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Weather.Classes;
 using Weather.Models;
 
 namespace Weather
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         DataResponse response;
+
         public MainWindow()
         {
             InitializeComponent();
-            Iint();
-
-        }
-        public async void Iint()
-        {
-            response = await GetWeather.Get(58.009671f, 56.226184f);
-
-            foreach (Forecast forecast in response.forecasts)
-                Days.Items.Add(forecast.date.ToString("dd.MM.yyyy"));
-            Create(0);
         }
 
-       public void Create(int idForecast)
-            
+        public async void Iint(string city = null)
         {
-            parent.Children.Clear();
-            foreach(Hour hour in response.forecasts[idForecast].hours)
+            try
             {
-                parent.Children.Add(new Elements.Item(hour));
+                Days.Items.Clear();
+
+                if (string.IsNullOrEmpty(city))
+                {
+                    response = await GetWeather.GetByCoordinates(58.009671f, 56.226184f);
+                }
+                else
+                {
+                    response = await GetWeather.GetByCityName(city);
+                }
+
+                if (response?.forecasts != null)
+                {
+                    foreach (Forecast forecast in response.forecasts)
+                        Days.Items.Add(forecast.date.ToString("dd.MM.yyyy"));
+
+                    Create(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка получения данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-      
+        public void Create(int idForecast)
+        {
+            parent.Children.Clear();
+            if (response?.forecasts != null && idForecast < response.forecasts.Count)
+            {
+                foreach (Hour hour in response.forecasts[idForecast].hours)
+                {
+                    parent.Children.Add(new Elements.Item(hour));
+                }
+            }
+        }
 
-        private void SelectDay(object sender, SelectionChangedEventArgs e)=>
-            Create(Days.SelectedIndex);
+        private void SelectDay(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (Days.SelectedIndex >= 0)
+                Create(Days.SelectedIndex);
+        }
 
         private void Update(object sender, RoutedEventArgs e)
         {
-            Iint();
-        }
+            string city = CityTextBox.Text?.Trim();
 
-       
+            if (!string.IsNullOrEmpty(city))
+            {
+                Iint(city);
+            }
+            else
+            {
+                MessageBox.Show("Введите название города", "Предупреждение",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
     }
 }

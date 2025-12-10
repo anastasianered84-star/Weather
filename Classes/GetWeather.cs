@@ -1,11 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// Файл: Classes/GetWeather.cs (обновленная версия)
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Security.Policy;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Weather.Models;
 
@@ -13,28 +9,40 @@ namespace Weather.Classes
 {
     public class GetWeather
     {
-        public static string Url = "https://api.weather.yandex.ru/v2/forecast";
-        public static string Key = "demo_yandex_weather_api_key_ca6d09349ba0";
-        public static async Task<DataResponse> Get(float lat, float lon)
+        public static string WeatherUrl = "https://api.weather.yandex.ru/v2/forecast";
+        public static string WeatherKey = "demo_yandex_weather_api_key_ca6d09349ba0";
+
+        public static async Task<DataResponse> GetByCoordinates(float lat, float lon)
         {
-            DataResponse DataResponse = null;
-            string url = $"{Url}?lat={lat}&lon={lon}".Replace(",",".");
+            DataResponse dataResponse = null;
+            string url = $"{WeatherUrl}?lat={lat}&lon={lon}".Replace(",", ".");
 
-            using (HttpClient Client = new HttpClient()) {
-                using (HttpRequestMessage Request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    url))
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
                 {
-                    Request.Headers.Add("X-Yandex-Weather-Key", Key);
+                    request.Headers.Add("X-Yandex-Weather-Key", WeatherKey);
 
-                    using (var Response = await Client.SendAsync(Request))
+                    using (var response = await client.SendAsync(request))
                     {
-                       string ContentResponse = await Response.Content.ReadAsStringAsync();
-                        DataResponse = JsonConvert.DeserializeObject<DataResponse>(ContentResponse);
+                        string contentResponse = await response.Content.ReadAsStringAsync();
+                        dataResponse = JsonConvert.DeserializeObject<DataResponse>(contentResponse);
                     }
-                }  
+                }
             }
-            return DataResponse;
+            return dataResponse;
+        }
+
+        public static async Task<DataResponse> GetByCityName(string cityName)
+        {
+            var coordinates = await Geocoder.GetCoordinates(cityName);
+
+            if (coordinates.lat == 0 && coordinates.lon == 0)
+            {
+                coordinates = (55.7558f, 37.6173f); 
+            }
+
+            return await GetByCoordinates(coordinates.lat, coordinates.lon);
         }
     }
 }
