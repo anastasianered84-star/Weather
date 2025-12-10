@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Policy;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Weather.Models;
 
 namespace Weather.Classes
 {
@@ -12,8 +15,9 @@ namespace Weather.Classes
     {
         public static string Url = "https://api.weather.yandex.ru/v2/forecast";
         public static string Key = "demo_yandex_weather_api_key_ca6d09349ba0";
-        public static async void Get(float lat, float lon)
+        public static async Task<DataResponse> Get(float lat, float lon)
         {
+            DataResponse DataResponse = null;
             string url = $"{Url}?lat={lat}&lon={lon}".Replace(",",".");
 
             using (HttpClient Client = new HttpClient()) {
@@ -25,10 +29,12 @@ namespace Weather.Classes
 
                     using (var Response = await Client.SendAsync(Request))
                     {
-                       string DataResponse = await Response.Content.ReadAsStringAsync();
+                       string ContentResponse = await Response.Content.ReadAsStringAsync();
+                        DataResponse = JsonConvert.DeserializeObject<DataResponse>(ContentResponse);
                     }
                 }  
             }
+            return DataResponse;
         }
     }
 }
