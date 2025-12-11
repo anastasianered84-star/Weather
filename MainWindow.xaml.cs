@@ -1,17 +1,28 @@
-﻿// Файл: MainWindow.xaml.cs (обновленная версия)
+﻿// Файл: MainWindow.xaml.cs
 using System.Windows;
 using Weather.Classes;
 using Weather.Models;
+using System.Threading.Tasks;
+using System;
 
 namespace Weather
 {
     public partial class MainWindow : Window
     {
         DataResponse response;
+        private string userId = "user_" + Guid.NewGuid().ToString().Substring(0, 8);
+        private bool isFromCache = false;
 
         public MainWindow()
         {
             InitializeComponent();
+           
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            await UpdateStatsInfo();
+            Iint();
         }
 
         public async void Iint(string city = null)
@@ -19,15 +30,10 @@ namespace Weather
             try
             {
                 Days.Items.Clear();
+                isFromCache = false;
 
-                if (string.IsNullOrEmpty(city))
-                {
-                    response = await GetWeather.GetByCoordinates(58.009671f, 56.226184f);
-                }
-                else
-                {
-                    response = await GetWeather.GetByCityName(city);
-                }
+                string cityName = string.IsNullOrEmpty(city) ? "Пермь" : city;
+                response = await GetWeather.GetWeatherData(cityName, userId);
 
                 if (response?.forecasts != null)
                 {
@@ -35,6 +41,7 @@ namespace Weather
                         Days.Items.Add(forecast.date.ToString("dd.MM.yyyy"));
 
                     Create(0);
+                    await UpdateStatsInfo();
                 }
             }
             catch (Exception ex)
@@ -53,16 +60,22 @@ namespace Weather
                 {
                     parent.Children.Add(new Elements.Item(hour));
                 }
+                if (isFromCache)
+                {
+                    CacheInfo.Text = " (из кэша)";
+                    CacheInfo.Foreground = System.Windows.Media.Brushes.Green;
+                    CacheInfo.ToolTip = "Данные взяты из локального кэша";
+                }
+                else
+                {
+                    CacheInfo.Text = " (с API)";
+                    CacheInfo.Foreground = System.Windows.Media.Brushes.Blue;
+                    CacheInfo.ToolTip = "Данные получены из API Яндекс.Погоды";
+                }
             }
         }
 
-        private void SelectDay(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (Days.SelectedIndex >= 0)
-                Create(Days.SelectedIndex);
-        }
-
-        private void Update(object sender, RoutedEventArgs e)
+        private async void Update(object sender, RoutedEventArgs e)
         {
             string city = CityTextBox.Text?.Trim();
 
@@ -74,6 +87,45 @@ namespace Weather
             {
                 MessageBox.Show("Введите название города", "Предупреждение",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void SelectDay(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (Days.SelectedIndex >= 0)
+                Create(Days.SelectedIndex);
+        }
+
+        private async Task UpdateStatsInfo()
+        {
+            try
+            {
+                var stats = await WeatherCache.GetStats(userId);
+
+                Dispatcher.Invoke(() =>
+                {
+                    LimitInfo.Text = $"Запросов: {stats.todayCount}/{WeatherCache.DAILY_LIMIT}";
+                    CacheInfo.Text = $" (Кэш: {stats.cachedCities})";
+                    if (stats.todayCount >= WeatherCache.DAILY_LIMIT)
+                    {
+                        LimitInfo.Foreground = System.Windows.Media.Brushes.Red;
+                        LimitInfo.ToolTip = "Дневной лимит исчерпан! Используйте кэшированные данные.";
+                    }
+                    else if (stats.todayCount >= WeatherCache.DAILY_LIMIT * 0.8)
+                    {
+                        LimitInfo.Foreground = System.Windows.Media.Brushes.Orange;
+                        LimitInfo.ToolTip = "Лимит почти исчерпан";
+                    }
+                    else
+                    {
+                        LimitInfo.Foreground = System.Windows.Media.Brushes.Green;
+                        LimitInfo.ToolTip = $"Осталось запросов: {stats.remaining}";
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обновлении статистики: {ex.Message}");
             }
         }
     }

@@ -1,8 +1,9 @@
-﻿// Файл: Classes/GetWeather.cs (обновленная версия)
+﻿// Файл: Classes/GetWeather.cs
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Windows;
 using Weather.Models;
 
 namespace Weather.Classes
@@ -12,7 +13,34 @@ namespace Weather.Classes
         public static string WeatherUrl = "https://api.weather.yandex.ru/v2/forecast";
         public static string WeatherKey = "demo_yandex_weather_api_key_ca6d09349ba0";
 
-        public static async Task<DataResponse> GetByCoordinates(float lat, float lon)
+        public static async Task<DataResponse> GetWeatherData(string cityName, string userId = "default_user")
+        {
+            var cachedData = await WeatherCache.GetCachedWeather(cityName);
+            if (cachedData != null)
+            {
+                Console.WriteLine("✓ Используются кэшированные данные");
+                return cachedData;
+            }
+            if (!await WeatherCache.CheckAndIncrementLimit(userId))
+            {
+                throw new Exception($"Достигнут дневной лимит запросов ({WeatherCache.DAILY_LIMIT}). Данные будут взяты из кэша при наличии.");
+            }
+            var coordinates = await Geocoder.GetCoordinates(cityName);
+            if (coordinates.lat == 0 && coordinates.lon == 0)
+            {
+                throw new Exception("Не удалось определить координаты города");
+            }
+            DataResponse dataResponse = await GetFromApi(coordinates.lat, coordinates.lon);
+            if (dataResponse != null)
+            {
+                await WeatherCache.SaveToCache(cityName, coordinates.lat, coordinates.lon, dataResponse);
+                Console.WriteLine("✓ Данные получены из API и сохранены в кэш");
+            }
+
+            return dataResponse;
+        }
+
+        private static async Task<DataResponse> GetFromApi(float lat, float lon)
         {
             DataResponse dataResponse = null;
             string url = $"{WeatherUrl}?lat={lat}&lon={lon}".Replace(",", ".");
@@ -31,18 +59,6 @@ namespace Weather.Classes
                 }
             }
             return dataResponse;
-        }
-
-        public static async Task<DataResponse> GetByCityName(string cityName)
-        {
-            var coordinates = await Geocoder.GetCoordinates(cityName);
-
-            if (coordinates.lat == 0 && coordinates.lon == 0)
-            {
-                coordinates = (55.7558f, 37.6173f); 
-            }
-
-            return await GetByCoordinates(coordinates.lat, coordinates.lon);
         }
     }
 }

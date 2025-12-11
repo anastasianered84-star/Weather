@@ -13,19 +13,42 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border Grid.Row="0" 
-                Background="#1A1A1A" 
+                Background="White" 
             Padding="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Text="WeatherSwag"
-                           Foreground="White"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="WeatherSwag"
+               Foreground="#4A90E2"
+               FontSize="18"
+               FontWeight="Bold"
+               VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                        <TextBlock x:Name="LimitInfo" 
+                   Text="Запросов: 0/50" 
+                   Foreground="Green"
+                   FontSize="12"
+                   VerticalAlignment="Center"
+                   ToolTip="Дневной лимит запросов к API"/>
+                        <TextBlock x:Name="CacheInfo" 
+                   Text=" (Кэш: 0)" 
+                   Foreground="#4A90E2"
+                   FontSize="12"
+                   VerticalAlignment="Center"
+                   Margin="5,0,0,0"
+                   ToolTip="Количество городов в кэше"/>
+                        <TextBlock x:Name="UserIdInfo"
+                   Text=""
+                   Foreground="#666666"
+                   FontSize="10"
+                   VerticalAlignment="Center"
+                   Margin="5,0,0,0"
+                   ToolTip="ID пользователя"/>
+                    </StackPanel>
+                </StackPanel>
 
                 <StackPanel Grid.Column="1" 
                             Orientation="Horizontal"
@@ -97,8 +120,6 @@
                                HorizontalAlignment="Center"/>
                 </Grid>
             </Border>
-
-            <!-- Scrollable content -->
             <ScrollViewer Grid.Row="1" 
                           VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="parent"/>
